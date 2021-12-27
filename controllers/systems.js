@@ -8,21 +8,26 @@ exports.shouldWater = function(req, res, next) {
     connection.query("SELECT * FROM systems WHERE id = ?", [id], function(err, rows, fields) {
         if (err) throw err;
 
+        // Check if id exists
         if (!rows.length) {
-            res.send("Doesn't exist!");
+            res.sendStatus(404);
             return;
         }
 
-        res.send(rows);
-    })
+        // Check API key
+        if (key != rows[0].apiKey) {
+            res.sendStatus(401);
+            return;
+        }
+        
 
-
-
-    /*connection.query("SELECT * FROM users WHERE id = 2", function(err, rows, fields) {
-        if (err) throw err;
-
-        res.send(rows[0]);
-    })*/
+        // Get data from DB
+        connection.query("SELECT * FROM wateringevents WHERE systemid = ?", [id], function(err2, rows2, fields2) {
+            if (err2) throw err2;
+    
+            res.json(rows2);
+        })
+    });
 }
 
 exports.wateredPlant = function(req, res, next) {
