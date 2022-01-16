@@ -34,7 +34,7 @@ exports.shouldWater = function(req, res, next) {
 
 exports.wateredPlant = [
     body("seconds").trim().isLength({ min: 1 }).toInt().escape().withMessage("inputMissing"),
-    body("timestamp").trim().isLength({ min: 1 }).toDate().escape().withMessage("inputMissing"),
+    body("timestamp").trim().isLength({ min: 1 }).escape().withMessage("inputMissing"),
     (req, res, next) => {
         let id = req.query.id;
         let key = req.query.key;
