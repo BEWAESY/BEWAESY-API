@@ -2,39 +2,55 @@ var connection = require("../modules/mysql");
 const { body, validationResult } = require("express-validator")
 
 
-exports.shouldWater = function(req, res, next) {
-    let id = req.query.id;
-    let key = req.query.key;
+exports.shouldWater = [
+    body("temperature").trim().isLength({ min: 1 }).toInt().escape().withMessage("inputMissing"),
+    body("humidity").trim().isLength({ min: 1 }).toInt().escape().withMessage("inputMissing"),
 
-    connection.query("SELECT * FROM systems WHERE id = ?", [id], function(err, rows, fields) {
-        if (err) throw err;
-
-        // Check if id exists
-        if (!rows.length) {
-            res.sendStatus(404);
+    (req, res, next) => {
+        // Check for validation errors
+        const validationErrors = validationResult(req);
+        if (!validationErrors.isEmpty()) {
+            console.log(validationErrors);
+            res.sendStatus(400);
             return;
         }
 
-        // Check API key
-        if (key != rows[0].apiKey) {
-            res.sendStatus(401);
-            return;
-        }
+        // Get required values
+        let id = req.query.id;
+        let key = req.query.key;
+        let temperature = req.body.temperature;
+        let humidity = req.body.humidity;
+
+        connection.query("SELECT * FROM systems WHERE id = ?", [id], function(err, rows, fields) {
+            if (err) throw err;
+
+            // Check if id exists
+            if (!rows.length) {
+                res.sendStatus(404);
+                return;
+            }
+
+            // Check API key
+            if (key != rows[0].apiKey) {
+                res.sendStatus(401);
+                return;
+            }
+            
+
+            // Get data from DB
+            connection.query("SELECT * FROM wateringevents WHERE systemid = ?", [id], function(err2, rows2, fields2) {
+                if (err2) throw err2;
         
+                res.json([rows, rows2]);
+            });
 
-        // Get data from DB
-        connection.query("SELECT * FROM wateringevents WHERE systemid = ?", [id], function(err2, rows2, fields2) {
-            if (err2) throw err2;
-    
-            res.json([rows, rows2]);
+            // Write last call and temperature data to DB
+            connection.query("UPDATE systems SET temperature = ?, humidity = ?, lastCall = ? WHERE id = ?", [temperature, humidity, new Date(), id], function(err3, rows3, fields3) {
+                if (err3) throw err3;
+            });
         });
-
-        // Write last call to DB
-        connection.query("UPDATE systems SET lastCall = ? WHERE id = ?", [new Date(), id], function(err3, rows3, fields3) {
-            if (err3) throw err3;
-        });
-    });
-}
+    }
+]
 
 
 exports.wateredPlant = [
