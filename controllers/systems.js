@@ -27,7 +27,12 @@ exports.shouldWater = function(req, res, next) {
             if (err2) throw err2;
     
             res.json([rows, rows2]);
-        })
+        });
+
+        // Write last call to DB
+        connection.query("UPDATE systems SET lastCall = ? WHERE id = ?", [new Date(), id], function(err3, rows3, fields3) {
+            if (err3) throw err3;
+        });
     });
 }
 
