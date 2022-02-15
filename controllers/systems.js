@@ -78,11 +78,11 @@ exports.wateredPlant = [
             }
 
             console.log(seconds);
-            console.log(timestamp);
+            console.log(new Date());
 
 
             // Insert data into systemlog DB
-            connection.query("INSERT systemlog SET systemid = ?, seconds = ?, timestamp = ?", [id, seconds, timestamp], function(err, results, fields) {
+            connection.query("INSERT systemlog SET systemid = ?, seconds = ?, timestamp = ?", [id, seconds, new Date()], function(err, results, fields) {
                 if (err) throw err;
             })
 
