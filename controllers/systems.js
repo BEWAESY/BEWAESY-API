@@ -48,7 +48,7 @@ exports.shouldWater = [
                     }
                 }
 
-                console.log(parseInt(totalTimeWatered));
+                
                 // Get data from DB
                 connection.query("SELECT * FROM wateringevents WHERE systemid = ?", [id], function(err3, rows3, fields3) {
                     if (err2) throw err2;
