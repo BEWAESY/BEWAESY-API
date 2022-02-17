@@ -35,13 +35,26 @@ exports.shouldWater = [
                 res.sendStatus(401);
                 return;
             }
-            
 
-            // Get data from DB
-            connection.query("SELECT * FROM wateringevents WHERE systemid = ?", [id], function(err2, rows2, fields2) {
+
+            connection.query("SELECT * FROM systemlog WHERE systemid = ? AND timestamp >= CURDATE()", [id], function(err2, rows2, fields2) {
                 if (err2) throw err2;
-        
-                res.json([rows, rows2]);
+
+                let totalTimeWatered = 0;
+
+                if (rows[0]["maxSeconds"] != 0) {
+                    for (singleLog of rows2) {
+                        totalTimeWatered += parseInt(singleLog["seconds"]);
+                    }
+                }
+
+                console.log(parseInt(totalTimeWatered));
+                // Get data from DB
+                connection.query("SELECT * FROM wateringevents WHERE systemid = ?", [id], function(err3, rows3, fields3) {
+                    if (err2) throw err2;
+            
+                    res.json([rows, rows3, rows[0]["maxSeconds"], totalTimeWatered]);
+                });
             });
 
             // Write last call and temperature data to DB
