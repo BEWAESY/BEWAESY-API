@@ -4,7 +4,7 @@ var connection = mysql.createConnection({
   user     : process.env.DBUSER,
   password : process.env.DBPASSWORD,
   database : process.env.DBDATABASE,
-  timezone: "utc"
+  timezone: "utc+1"
 });
 
 connection.connect();
